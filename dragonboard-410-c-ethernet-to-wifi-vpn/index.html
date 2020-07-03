@@ -47,175 +47,175 @@ void function() {
 <h2>0. Before starting</h2>
 <p>You will need to connect the ethernet connection to the board using the adapter.
 Once you have successfully connected run the command:</p>
-<div class="gatsby-highlight" data-language="text"><pre class="language-text"><code class="language-text">ip a</code></pre></div>
+<div class="gatsby-highlight" data-language="bash"><pre class="language-bash"><code class="language-bash"><span class="token function">ip</span> a</code></pre></div>
 <p>and look for the names of the ethernet to usb, and the wifi adapter.</p>
 <p>Look in the <strong><em>“Adapter Names”</em></strong> section of the appendix for more information.</p>
 <p>From now on, I will be referring to the ethernet adapter as <strong><em>eth0</em></strong> and to the wifi one as <strong><em>wlan0</em></strong>.</p>
 <h2>1. First steps</h2>
 <p>After flashing the firmware, you will need to install a few relevant packages.
 Run the commands:</p>
-<div class="gatsby-highlight" data-language="text"><pre class="language-text"><code class="language-text">sudo apt-get update
-sudo apt-get upgrade
-sudo apt-get install hostapd dnsmasq dhcpcd5 iptables iw rfkill bridge-utils
-sudo apt-get install openvpn -y</code></pre></div>
+<div class="gatsby-highlight" data-language="bash"><pre class="language-bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">apt-get</span> update
+<span class="token function">sudo</span> <span class="token function">apt-get</span> upgrade
+<span class="token function">sudo</span> <span class="token function">apt-get</span> <span class="token function">install</span> hostapd dnsmasq dhcpcd5 iptables iw rfkill bridge-utils
+<span class="token function">sudo</span> <span class="token function">apt-get</span> <span class="token function">install</span> openvpn -y</code></pre></div>
 <p>now, stop the <code class="language-text">hostapd</code> and <code class="language-text">dnsmasq</code> processes by running:</p>
-<div class="gatsby-highlight" data-language="text"><pre class="language-text"><code class="language-text">sudo systemctl stop hostapd
-sudo systemctl stop dnsmasq</code></pre></div>
+<div class="gatsby-highlight" data-language="bash"><pre class="language-bash"><code class="language-bash"><span class="token function">sudo</span> systemctl stop hostapd
+<span class="token function">sudo</span> systemctl stop dnsmasq</code></pre></div>
 <h2>2.DHCPCD configuration</h2>
 <p>We now need to modify our <code class="language-text">dhcpcd</code> configuration. </p>
-<div class="gatsby-highlight" data-language="text"><pre class="language-text"><code class="language-text">sudo nano /etc/dhcpcd.conf</code></pre></div>
+<div class="gatsby-highlight" data-language="bash"><pre class="language-bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">nano</span> /etc/dhcpcd.conf</code></pre></div>
 <p>and add this to the bottom:</p>
-<div class="gatsby-highlight" data-language="text"><pre class="language-text"><code class="language-text">interface wlan0
-    static ip_address=192.168.220.1/24
+<div class="gatsby-highlight" data-language="bash"><pre class="language-bash"><code class="language-bash">interface wlan0
+    static <span class="token assign-left variable">ip_address</span><span class="token operator">=</span><span class="token number">192.168</span>.220.1/24
     nohook wpa_supplicant</code></pre></div>
 <p>save the file and restart the <code class="language-text">dhcpcd</code> service:</p>
-<div class="gatsby-highlight" data-language="text"><pre class="language-text"><code class="language-text">sudo systemctl restart dhcpcd</code></pre></div>
+<div class="gatsby-highlight" data-language="bash"><pre class="language-bash"><code class="language-bash"><span class="token function">sudo</span> systemctl restart dhcpcd</code></pre></div>
 <h3>Disclaimer</h3>
 <p>I have noticed that this step, though crucial to the successfull configuration, will not allow you to use SSH to connect to the dragonboard. It will also block you from accessing the internet from the board. This step can also be done at the end so you can skip it for now.</p>
 <h2>3. Hostapd setup</h2>
 <p>We will need to create a hostapad configuration.</p>
 <p>Create a new file at this location:</p>
-<div class="gatsby-highlight" data-language="text"><pre class="language-text"><code class="language-text">sudo nano /etc/hostapd/hostapd.conf</code></pre></div>
+<div class="gatsby-highlight" data-language="bash"><pre class="language-bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">nano</span> /etc/hostapd/hostapd.conf</code></pre></div>
 <p>and add this text.
 <strong>FOR YOUR OWN SECURITY CHANGE THE ssid= AND wpa_passphrase= FIELDS</strong></p>
-<div class="gatsby-highlight" data-language="text"><pre class="language-text"><code class="language-text">interface=wlan0
-driver=nl80211
+<div class="gatsby-highlight" data-language="bash"><pre class="language-bash"><code class="language-bash"><span class="token assign-left variable">interface</span><span class="token operator">=</span>wlan0
+<span class="token assign-left variable">driver</span><span class="token operator">=</span>nl80211
 
-hw_mode=g
-channel=6
-ieee80211n=1
-wmm_enabled=0
-macaddr_acl=0
-ignore_broadcast_ssid=0
+<span class="token assign-left variable">hw_mode</span><span class="token operator">=</span>g
+<span class="token assign-left variable">channel</span><span class="token operator">=</span><span class="token number">6</span>
+<span class="token assign-left variable">ieee80211n</span><span class="token operator">=</span><span class="token number">1</span>
+<span class="token assign-left variable">wmm_enabled</span><span class="token operator">=</span><span class="token number">0</span>
+<span class="token assign-left variable">macaddr_acl</span><span class="token operator">=</span><span class="token number">0</span>
+<span class="token assign-left variable">ignore_broadcast_ssid</span><span class="token operator">=</span><span class="token number">0</span>
 
-auth_algs=1
-wpa=2
-wpa_key_mgmt=WPA-PSK
-wpa_pairwise=TKIP
-rsn_pairwise=CCMP
+<span class="token assign-left variable">auth_algs</span><span class="token operator">=</span><span class="token number">1</span>
+<span class="token assign-left variable">wpa</span><span class="token operator">=</span><span class="token number">2</span>
+<span class="token assign-left variable">wpa_key_mgmt</span><span class="token operator">=</span>WPA-PSK
+<span class="token assign-left variable">wpa_pairwise</span><span class="token operator">=</span>TKIP
+<span class="token assign-left variable">rsn_pairwise</span><span class="token operator">=</span>CCMP
 
-# This is the name of the network
-ssid=Essos
-# The network passphrase
-wpa_passphrase=ValarMorghulis</code></pre></div>
+<span class="token comment"># This is the name of the network</span>
+<span class="token assign-left variable">ssid</span><span class="token operator">=</span>Essos
+<span class="token comment"># The network passphrase</span>
+<span class="token assign-left variable">wpa_passphrase</span><span class="token operator">=</span>ValarMorghulis</code></pre></div>
 <p>then, edit the file at:</p>
-<div class="gatsby-highlight" data-language="text"><pre class="language-text"><code class="language-text">sudo nano /etc/default/hostapd</code></pre></div>
+<div class="gatsby-highlight" data-language="bash"><pre class="language-bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">nano</span> /etc/default/hostapd</code></pre></div>
 <p>by subtituting the line</p>
-<div class="gatsby-highlight" data-language="text"><pre class="language-text"><code class="language-text">#DAEMON_CONF=&quot;&quot; </code></pre></div>
+<div class="gatsby-highlight" data-language="bash"><pre class="language-bash"><code class="language-bash"><span class="token comment">#DAEMON_CONF="" </span></code></pre></div>
 <p>with</p>
-<div class="gatsby-highlight" data-language="text"><pre class="language-text"><code class="language-text">DAEMON_CONF=&quot;/etc/hostapd/hostapd.conf&quot;</code></pre></div>
+<div class="gatsby-highlight" data-language="bash"><pre class="language-bash"><code class="language-bash"><span class="token assign-left variable">DAEMON_CONF</span><span class="token operator">=</span><span class="token string">"/etc/hostapd/hostapd.conf"</span></code></pre></div>
 <p>notice we have deleted the <code class="language-text">#</code>.</p>
 <p>Save the file and do the same but for another file.
 This time, edit the file</p>
-<div class="gatsby-highlight" data-language="text"><pre class="language-text"><code class="language-text">sudo nano /etc/init.d/hostapd</code></pre></div>
+<div class="gatsby-highlight" data-language="bash"><pre class="language-bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">nano</span> /etc/init.d/hostapd</code></pre></div>
 <p>and replace</p>
-<div class="gatsby-highlight" data-language="text"><pre class="language-text"><code class="language-text">DAEMON_CONF= </code></pre></div>
+<div class="gatsby-highlight" data-language="bash"><pre class="language-bash"><code class="language-bash"><span class="token assign-left variable">DAEMON_CONF</span><span class="token operator">=</span> </code></pre></div>
 <p>with</p>
-<div class="gatsby-highlight" data-language="text"><pre class="language-text"><code class="language-text">DAEMON_CONF=/etc/hostapd/hostapd.conf</code></pre></div>
+<div class="gatsby-highlight" data-language="bash"><pre class="language-bash"><code class="language-bash"><span class="token assign-left variable">DAEMON_CONF</span><span class="token operator">=</span>/etc/hostapd/hostapd.conf</code></pre></div>
 <h2>4. dnsmasq setup</h2>
 <p>We rename the current configuration file by running the command</p>
-<div class="gatsby-highlight" data-language="text"><pre class="language-text"><code class="language-text">sudo mv /etc/dnsmasq.conf /etc/dnsmasq.conf.orig</code></pre></div>
+<div class="gatsby-highlight" data-language="bash"><pre class="language-bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">mv</span> /etc/dnsmasq.conf /etc/dnsmasq.conf.orig</code></pre></div>
 <p>then we open:</p>
-<div class="gatsby-highlight" data-language="text"><pre class="language-text"><code class="language-text">sudo nano /etc/dnsmasq.conf</code></pre></div>
+<div class="gatsby-highlight" data-language="bash"><pre class="language-bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">nano</span> /etc/dnsmasq.conf</code></pre></div>
 <p>and add the following lines:</p>
-<div class="gatsby-highlight" data-language="text"><pre class="language-text"><code class="language-text">interface=wlan0       # Use interface wlan0  
-server=1.1.1.1       # Use Cloudflare DNS  
-dhcp-range=192.168.220.50,192.168.220.150,12h # IP range and lease time </code></pre></div>
+<div class="gatsby-highlight" data-language="bash"><pre class="language-bash"><code class="language-bash"><span class="token assign-left variable">interface</span><span class="token operator">=</span>wlan0       <span class="token comment"># Use interface wlan0  </span>
+<span class="token assign-left variable">server</span><span class="token operator">=</span><span class="token number">1.1</span>.1.1       <span class="token comment"># Use Cloudflare DNS  </span>
+dhcp-range<span class="token operator">=</span><span class="token number">192.168</span>.220.50,192.168.220.150,12h <span class="token comment"># IP range and lease time </span></code></pre></div>
 <p>save the file.</p>
 <h2>5. Forwarding traffic</h2>
 <p>First, we enable it throught the <strong><em>systctl.conf</em></strong> file.</p>
-<div class="gatsby-highlight" data-language="text"><pre class="language-text"><code class="language-text">sudo nano /etc/sysctl.conf</code></pre></div>
+<div class="gatsby-highlight" data-language="bash"><pre class="language-bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">nano</span> /etc/sysctl.conf</code></pre></div>
 <p>then remove the line</p>
-<div class="gatsby-highlight" data-language="text"><pre class="language-text"><code class="language-text">#net.ipv4.ip_forward=1</code></pre></div>
+<div class="gatsby-highlight" data-language="bash"><pre class="language-bash"><code class="language-bash"><span class="token comment">#net.ipv4.ip_forward=1</span></code></pre></div>
 <p>and replace it with</p>
-<div class="gatsby-highlight" data-language="text"><pre class="language-text"><code class="language-text">net.ipv4.ip_forward=1</code></pre></div>
+<div class="gatsby-highlight" data-language="bash"><pre class="language-bash"><code class="language-bash">net.ipv4.ip_forward<span class="token operator">=</span><span class="token number">1</span></code></pre></div>
 <p>In order to avoid rebooting to activate the changes we run:</p>
-<div class="gatsby-highlight" data-language="text"><pre class="language-text"><code class="language-text">sudo sh -c &quot;echo 1 &gt; /proc/sys/net/ipv4/ip_forward&quot;</code></pre></div>
+<div class="gatsby-highlight" data-language="bash"><pre class="language-bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">sh</span> -c <span class="token string">"echo 1 > /proc/sys/net/ipv4/ip_forward"</span></code></pre></div>
 <h3>Iptables</h3>
 <p>I had to follow <a href="https://github.com/netblue30/firejail/issues/2232#issuecomment-436423748">this comment on an iptables issue</a>in order to run iptables on my dragonboard.</p>
 <p>It suggested to run</p>
-<div class="gatsby-highlight" data-language="text"><pre class="language-text"><code class="language-text">sudo update-alternatives --set iptables /usr/sbin/iptables-legacy</code></pre></div>
+<div class="gatsby-highlight" data-language="bash"><pre class="language-bash"><code class="language-bash"><span class="token function">sudo</span> update-alternatives --set iptables /usr/sbin/iptables-legacy</code></pre></div>
 <p>in order to downgrade the iptables install to a version which supports the commands we will use</p>
 <p>Run the following command to add new rules to the iptable:</p>
-<div class="gatsby-highlight" data-language="text"><pre class="language-text"><code class="language-text">sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE</code></pre></div>
+<div class="gatsby-highlight" data-language="bash"><pre class="language-bash"><code class="language-bash"><span class="token function">sudo</span> iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE</code></pre></div>
 <p>then save the rules</p>
-<div class="gatsby-highlight" data-language="text"><pre class="language-text"><code class="language-text">sudo sh -c &quot;iptables-save &gt; /etc/iptables.ipv4.nat&quot;</code></pre></div>
+<div class="gatsby-highlight" data-language="bash"><pre class="language-bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">sh</span> -c <span class="token string">"iptables-save > /etc/iptables.ipv4.nat"</span></code></pre></div>
 <p>and to make sure the settins are run when we boot edit the file:</p>
-<div class="gatsby-highlight" data-language="text"><pre class="language-text"><code class="language-text">sudo nano /etc/rc.local</code></pre></div>
+<div class="gatsby-highlight" data-language="bash"><pre class="language-bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">nano</span> /etc/rc.local</code></pre></div>
 <p>find</p>
-<div class="gatsby-highlight" data-language="text"><pre class="language-text"><code class="language-text">exit 0</code></pre></div>
+<div class="gatsby-highlight" data-language="bash"><pre class="language-bash"><code class="language-bash"><span class="token builtin class-name">exit</span> <span class="token number">0</span></code></pre></div>
 <p>and add in an empty line above “exit 0”</p>
-<div class="gatsby-highlight" data-language="text"><pre class="language-text"><code class="language-text">iptables-restore &lt; /etc/iptables.ipv4.nat</code></pre></div>
+<div class="gatsby-highlight" data-language="bash"><pre class="language-bash"><code class="language-bash">iptables-restore <span class="token operator">&lt;</span> /etc/iptables.ipv4.nat</code></pre></div>
 <p>save, start hostapd and dnsmasq, and reboot</p>
-<div class="gatsby-highlight" data-language="text"><pre class="language-text"><code class="language-text">sudo service hostapd start
-sudo service dnsmasq start
-sudo reboot</code></pre></div>
+<div class="gatsby-highlight" data-language="bash"><pre class="language-bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">service</span> hostapd start
+<span class="token function">sudo</span> <span class="token function">service</span> dnsmasq start
+<span class="token function">sudo</span> <span class="token function">reboot</span></code></pre></div>
 <h1>Create VPN Access Point</h1>
 <h2>1. OpenVPN setup</h2>
 <p>I will be showing the setup for a NordVPN account, for VyprVPN, go to the original RaspberryPi tutorial <a href="https://pimylifeup.com/raspberry-pi-vpn-access-point/">here</a></p>
 <h3>Authentication file</h3>
 <p>go to</p>
-<div class="gatsby-highlight" data-language="text"><pre class="language-text"><code class="language-text">cd /etc/openvpn</code></pre></div>
+<div class="gatsby-highlight" data-language="bash"><pre class="language-bash"><code class="language-bash"><span class="token builtin class-name">cd</span> /etc/openvpn</code></pre></div>
 <p>and create a new file</p>
-<div class="gatsby-highlight" data-language="text"><pre class="language-text"><code class="language-text">sudo nano /etc/openvpn/auth.txt</code></pre></div>
+<div class="gatsby-highlight" data-language="bash"><pre class="language-bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">nano</span> /etc/openvpn/auth.txt</code></pre></div>
 <p>Insert NordVPN’s email and password on two separate and adjacent lines, like this:</p>
-<div class="gatsby-highlight" data-language="text"><pre class="language-text"><code class="language-text">email
+<div class="gatsby-highlight" data-language="bash"><pre class="language-bash"><code class="language-bash">email
 password</code></pre></div>
 <h3>Get the OpenVPN files</h3>
 <p>go at the location</p>
-<div class="gatsby-highlight" data-language="text"><pre class="language-text"><code class="language-text">cd /etc/openvpn</code></pre></div>
+<div class="gatsby-highlight" data-language="bash"><pre class="language-bash"><code class="language-bash"><span class="token builtin class-name">cd</span> /etc/openvpn</code></pre></div>
 <p>Go to the <a href="https://nordvpn.com/ovpn/">ovpn section on the NordVPN website</a>.
 Find the server you need, right click on the <strong><em>“Download UDP”</em></strong> button and copy the link by pressing <strong><em>“Copy Link Address”</em></strong>.</p>
 <p>paste the link address in this command</p>
-<div class="gatsby-highlight" data-language="text"><pre class="language-text"><code class="language-text">sudo wget &lt;INSERT_LINK_HERE&gt;</code></pre></div>
+<div class="gatsby-highlight" data-language="bash"><pre class="language-bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">wget</span> <span class="token operator">&lt;</span>INSERT_LINK_HERE<span class="token operator">></span></code></pre></div>
 <p>I have chosen the <strong><em>it91</em></strong> server. Change the next commands by substituing <strong><em>it91</em></strong> with your chosen server.</p>
 <p>In order to make the rest of the tutorial slightly easier, rename the file you just downloaded. Also, we need to change the extension from .ovpn to .conf.</p>
 <p>The file I downloaded is named <strong><em>it91.nordvpn.com.udp1194.ovpn</em></strong></p>
 <p>I change its name by executing:</p>
-<div class="gatsby-highlight" data-language="text"><pre class="language-text"><code class="language-text">sudo mv it91.nordvpn.com.udp1194.ovpn it91.conf</code></pre></div>
+<div class="gatsby-highlight" data-language="bash"><pre class="language-bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">mv</span> it91.nordvpn.com.udp1194.ovpn it91.conf</code></pre></div>
 <h2>Setting up the VPN</h2>
 <p>Change the content of the newly renamed</p>
-<div class="gatsby-highlight" data-language="text"><pre class="language-text"><code class="language-text">sudo nano it91.conf</code></pre></div>
+<div class="gatsby-highlight" data-language="bash"><pre class="language-bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">nano</span> it91.conf</code></pre></div>
 <p>by deleting the line</p>
-<div class="gatsby-highlight" data-language="text"><pre class="language-text"><code class="language-text">auth-user-pass</code></pre></div>
+<div class="gatsby-highlight" data-language="bash"><pre class="language-bash"><code class="language-bash">auth-user-pass</code></pre></div>
 <p>and replacing it with</p>
-<div class="gatsby-highlight" data-language="text"><pre class="language-text"><code class="language-text">auth-user-pass auth.txt</code></pre></div>
+<div class="gatsby-highlight" data-language="bash"><pre class="language-bash"><code class="language-bash">auth-user-pass auth.txt</code></pre></div>
 <p>save the file.</p>
 <p>Now to automatically connect to this server on startup we modify the file</p>
-<div class="gatsby-highlight" data-language="text"><pre class="language-text"><code class="language-text">sudo nano /etc/default/openvpn</code></pre></div>
+<div class="gatsby-highlight" data-language="bash"><pre class="language-bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">nano</span> /etc/default/openvpn</code></pre></div>
 <p>by replacing the line</p>
-<div class="gatsby-highlight" data-language="text"><pre class="language-text"><code class="language-text">#autostart=&quot;all&quot;</code></pre></div>
+<div class="gatsby-highlight" data-language="bash"><pre class="language-bash"><code class="language-bash"><span class="token comment">#autostart="all"</span></code></pre></div>
 <p>with </p>
-<div class="gatsby-highlight" data-language="text"><pre class="language-text"><code class="language-text">autostart=&quot;it91&quot;</code></pre></div>
+<div class="gatsby-highlight" data-language="bash"><pre class="language-bash"><code class="language-bash"><span class="token assign-left variable">autostart</span><span class="token operator">=</span><span class="token string">"it91"</span></code></pre></div>
 <h2>Iptables setup</h2>
 <p>We need to flush our current iptables</p>
-<div class="gatsby-highlight" data-language="text"><pre class="language-text"><code class="language-text">sudo iptables -F
-sudo iptables -t nat -F
-sudo iptables -X</code></pre></div>
+<div class="gatsby-highlight" data-language="bash"><pre class="language-bash"><code class="language-bash"><span class="token function">sudo</span> iptables -F
+<span class="token function">sudo</span> iptables -t nat -F
+<span class="token function">sudo</span> iptables -X</code></pre></div>
 <p>then install our new iptables</p>
-<div class="gatsby-highlight" data-language="text"><pre class="language-text"><code class="language-text">sudo iptables -t nat -A POSTROUTING -o tun0 -j MASQUERADE</code></pre></div>
+<div class="gatsby-highlight" data-language="bash"><pre class="language-bash"><code class="language-bash"><span class="token function">sudo</span> iptables -t nat -A POSTROUTING -o tun0 -j MASQUERADE</code></pre></div>
 <p>and then overwrite the old rules from the tutorial without VPN</p>
-<div class="gatsby-highlight" data-language="text"><pre class="language-text"><code class="language-text">sudo sh -c &quot;iptables-save &gt; /etc/iptables.ipv4.nat&quot;</code></pre></div>
+<div class="gatsby-highlight" data-language="bash"><pre class="language-bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">sh</span> -c <span class="token string">"iptables-save > /etc/iptables.ipv4.nat"</span></code></pre></div>
 <h2>Create Bridge</h2>
 <p>The last step requires us to create a bridge between the ethernet and wifi ports.
 We can do this by editing the file</p>
-<div class="gatsby-highlight" data-language="text"><pre class="language-text"><code class="language-text">sudo nano /etc/network/interfaces</code></pre></div>
+<div class="gatsby-highlight" data-language="bash"><pre class="language-bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">nano</span> /etc/network/interfaces</code></pre></div>
 <p>and adding the following lines:</p>
-<div class="gatsby-highlight" data-language="text"><pre class="language-text"><code class="language-text">auto br0
+<div class="gatsby-highlight" data-language="bash"><pre class="language-bash"><code class="language-bash">auto br0
 
 iface br0 inet dhcp
 
 bridge-ports eth0 wlan0</code></pre></div>
 <p>then we run the following two commands</p>
-<div class="gatsby-highlight" data-language="text"><pre class="language-text"><code class="language-text">sudo service network-manager stop
+<div class="gatsby-highlight" data-language="bash"><pre class="language-bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">service</span> network-manager stop
 
-sudo rfkill unblock wlan</code></pre></div>
+<span class="token function">sudo</span> rfkill unblock wlan</code></pre></div>
 <p>and we bring up the bridge <strong><em>br0</em></strong> </p>
-<div class="gatsby-highlight" data-language="text"><pre class="language-text"><code class="language-text">sudo ifup br0</code></pre></div>
+<div class="gatsby-highlight" data-language="bash"><pre class="language-bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">ifup</span> br0</code></pre></div>
 <p>and run our hostapd configuration by running</p>
-<div class="gatsby-highlight" data-language="text"><pre class="language-text"><code class="language-text">sudo /etc/init.d/hostapd restart</code></pre></div>
+<div class="gatsby-highlight" data-language="bash"><pre class="language-bash"><code class="language-bash"><span class="token function">sudo</span> /etc/init.d/hostapd restart</code></pre></div>
 <p>finally, reboot the device</p>
-<div class="gatsby-highlight" data-language="text"><pre class="language-text"><code class="language-text">sudo reboot</code></pre></div>
+<div class="gatsby-highlight" data-language="bash"><pre class="language-bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">reboot</span></code></pre></div>
 <h1>Appendix</h1>
 <h2>The host machine I used:</h2>
 <ul>
@@ -231,19 +231,19 @@ sudo rfkill unblock wlan</code></pre></div>
 <h2>Adapter Names</h2>
 <p>In my case, after running the
 <code class="language-text">ip a</code> command (you could also run <code class="language-text">sudo ifconfig</code>, though it is deprecated at the time of writing this tutorial) I obtained something on the lines of this result:</p>
-<div class="gatsby-highlight" data-language="text"><pre class="language-text"><code class="language-text">1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+<div class="gatsby-highlight" data-language="bash"><pre class="language-bash"><code class="language-bash"><span class="token number">1</span>: lo: <span class="token operator">&lt;</span>LOOPBACK,UP,LOWER_UP<span class="token operator">></span> mtu <span class="token number">65536</span> qdisc noqueue state UNKNOWN group default qlen <span class="token number">1000</span>
     link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
-    inet 127.0.0.1/8 scope host lo
+    inet <span class="token number">127.0</span>.0.1/8 scope <span class="token function">host</span> lo
        valid_lft forever preferred_lft forever
-    inet6 ::1/128 scope host 
+    inet6 ::1/128 scope <span class="token function">host</span> 
        valid_lft forever preferred_lft forever
-2: enx008e8a8d9465: &lt;NO-CARRIER,BROADCAST,MULTICAST,UP&gt; mtu 1500 qdisc fq_codel state DOWN group default qlen 1000
-    link/ether 88:d7:f6:1f:28:c9 brd ff:ff:ff:ff:ff:ff
-3: wlan0: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc mq state UP group default qlen 1000
+<span class="token number">2</span>: enx008e8a8d9465: <span class="token operator">&lt;</span>NO-CARRIER,BROADCAST,MULTICAST,UP<span class="token operator">></span> mtu <span class="token number">1500</span> qdisc fq_codel state DOWN group default qlen <span class="token number">1000</span>
+    link/ether <span class="token number">88</span>:d7:f6:1f:28:c9 brd ff:ff:ff:ff:ff:ff
+<span class="token number">3</span>: wlan0: <span class="token operator">&lt;</span>BROADCAST,MULTICAST,UP,LOWER_UP<span class="token operator">></span> mtu <span class="token number">1500</span> qdisc mq state UP group default qlen <span class="token number">1000</span>
     link/ether f0:03:8c:ab:dc:89 brd ff:ff:ff:ff:ff:ff
-    inet 192.168.1.192/24 brd 192.168.1.255 scope global dynamic noprefixroute wlp3s0
+    inet <span class="token number">192.168</span>.1.192/24 brd <span class="token number">192.168</span>.1.255 scope global dynamic noprefixroute wlp3s0
        valid_lft 20331sec preferred_lft 20331sec
-    inet6 fe80::aee5:8162:f8c9:f2ea/64 scope link noprefixroute 
+    inet6 fe80::aee5:8162:f8c9:f2ea/64 scope <span class="token function">link</span> noprefixroute 
        valid_lft forever preferred_lft forever</code></pre></div>
 <p>We ignore the <code class="language-text">lo</code> and we notice that the wifi adapter is named <strong><em>wlan0</em></strong> and the ethernet to usb one is named <strong><em>enx008e8a8d9465</em></strong>. Names are usually similar and easily spotted, especially if you run a clean install of Debian as I sugges you do. In that case, you should only see three results and it will be easy to spot which ones are the ones you need.</p>
 <h3>DISCLAIMERS</h3>
